@@ -1,0 +1,5 @@
+@reference "../../../styles.css";
+
+input {
+    @apply bg-gray-200;
+}
