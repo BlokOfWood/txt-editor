@@ -1,1 +1,17 @@
-<p>register works!</p>
+<form class="absolute inset-0 flex items-center justify-center flex-col gap-8 bg-bg pb-16" (submit)="register($event)">
+    <div class="text-red-500 h-6" [ngClass]="{'text-red-500': message()?.type === 'error'}">{{ message()?.message }}</div>
+    <div>
+        <label class="text-center block mb-2" for="username">Username</label>
+        <input [field]="registerForm.username" class="p-1" id="username" type="text" />
+    </div>
+    <div>
+        <label class="text-center block mb-2" for="password">Password</label>
+        <input [field]="registerForm.password" class="p-1" id="password" type="password" />
+    </div>
+    <div>
+        <label class="text-center block mb-2" for="confirmPassword">Confirm Password</label>
+        <input [field]="registerForm.confirmPassword" class="p-1" id="confirmPassword" type="password" />
+    </div>
+    <button>Register</button>
+    <p>Already have an account? Login <a routerLink="/login">here</a></p>
+</form>

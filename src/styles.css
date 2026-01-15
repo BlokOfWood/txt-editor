@@ -30,7 +30,7 @@
     }
 
     a {
-        @apply bg-primary px-1.5 hover:bg-accent hover:underline transition-colors duration-100;
+        @apply bg-primary px-1 hover:bg-accent hover:underline transition-colors duration-100;
     }
 
     button {
