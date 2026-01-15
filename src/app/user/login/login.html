@@ -1,4 +1,7 @@
-<form class="absolute inset-0 flex items-center justify-center flex-col gap-8" (submit)="login($event)">
+<form class="absolute inset-0 flex items-center justify-center flex-col gap-8 bg-sepia-bg" (submit)="login($event)">
+    @if(errorMessage() !== null) {
+        <p class="text-red-500">{{ errorMessage() }}</p>
+    }
     <div>
         <label class="text-center block mb-2" for="username">Username</label>
         <input [field]="loginForm.username" class="p-1" id="username" type="text" />
@@ -7,5 +10,6 @@
         <label class="text-center block mb-2" for="password">Password</label>
         <input [field]="loginForm.password" class="p-1" id="password" type="password" />
     </div>
-    <button class="bg-gray-200 px-4 py-2 rounded">Login</button>
+    <button class="bg-sepia-accent px-4 py-2 rounded">Login</button>
+    <p>No account yet? Register <a routerLink="/register">here</a></p>
 </form>
