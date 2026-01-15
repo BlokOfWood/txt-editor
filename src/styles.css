@@ -3,8 +3,37 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #dbbde0;
-    --color-sepia-bg: #ffdbb7;
-    --color-sepia-secondary: #ffce9d;
-    --color-sepia-accent: #e1aa74;
+    --color-primary: #e1aa74;
+    --color-bg: #ffdbb7;
+    --color-secondary: #ffce9d;
+    --color-accent: #ffc388;
+    --color-text: black;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-primary: #50277c;
+        --color-bg: #05000c;
+        --color-secondary: #100a1c;
+        --color-accent: #a048ff;
+        --color-text: #fbe8ff;
+    }
+}
+
+@layer components {
+    * {
+        color: var(--color-text);
+    }
+
+    input {
+        @apply bg-secondary;
+    }
+
+    a {
+        @apply bg-primary px-1.5 hover:bg-accent hover:underline transition-colors duration-100;
+    }
+
+    button {
+        @apply bg-primary px-4 py-2 rounded;
+    }
 }

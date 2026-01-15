@@ -1,9 +1,0 @@
-@reference "../../../styles.css";
-
-input {
-    @apply bg-sepia-secondary;
-}
-
-a {
-    @apply bg-black text-sepia-bg px-1 hover:underline;
-}
