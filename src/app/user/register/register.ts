@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { RegisterDto } from '../../../models/login.model';
+import { RegisterDto } from '../../../models/user.model';
 import { form, Field } from '@angular/forms/signals';
 import { UserApi } from '../../services/api/user.api';
 import { HttpErrorResponse } from '@angular/common/http';

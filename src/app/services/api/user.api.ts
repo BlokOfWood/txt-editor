@@ -1,5 +1,5 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
-import { LoginDto, RegisterDto } from '../../../models/login.model';
+import { LoginDto, RegisterDto, UserData } from '../../../models/user.model';
 import { Observable } from 'rxjs';
 import { Api } from './api';
 
@@ -15,5 +15,9 @@ export class UserApi {
 
     register(registerRequest: RegisterDto, destroyRef: DestroyRef): Observable<void> {
         return this.api.post("user/register", registerRequest, destroyRef);
+    }
+
+    me(destroyRef: DestroyRef): Observable<UserData> {
+        return this.api.get("user/me", destroyRef);
     }
 }

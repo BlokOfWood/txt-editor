@@ -1,10 +1,11 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { LoginDto } from '../../../models/login.model';
+import { LoginDto } from '../../../models/user.model';
 import { form, Field } from '@angular/forms/signals';
 import { UserApi } from '../../services/api/user.api';
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { HttpErrorResponse } from '@angular/common/http';
 import { Message } from '../../../models/ui.model';
+import { User } from '../../services/user';
 
 @Component({
     selector: 'app-login',
@@ -15,6 +16,8 @@ import { Message } from '../../../models/ui.model';
 export class Login {
     private userApi = inject(UserApi);
     private destroyRef = inject(DestroyRef);
+    private router = inject(Router);
+    private userService = inject(User);
 
     message = signal<Message>(null);
 
@@ -26,9 +29,17 @@ export class Login {
 
         event.preventDefault();
 
-        this.userApi.login(this.loginForm().value(), this.destroyRef).subscribe({
+        this.userApi.login(this.loginForm().value(), this.destroyRef).pipe().subscribe({
             next: () => {
                 this.message.set({ message: "Login successful!", type: "info" });
+
+                this.userService.login();
+
+                const timeoutId = setTimeout(() => {
+                    this.router.navigateByUrl("/document");
+                }, 500);
+
+                this.destroyRef.onDestroy(() => { clearTimeout(timeoutId); });
             },
             error: (error: HttpErrorResponse) => {
                 switch (error.status) {
