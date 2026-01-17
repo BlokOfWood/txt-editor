@@ -1,7 +1,6 @@
-import { HttpClient } from '@angular/common/http';
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { UserApi } from './api/user.api';
-import { map, Observable, ReplaySubject, Subject, tap } from 'rxjs';
+import { catchError, EMPTY, tap } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -22,13 +21,18 @@ export class User {
     }
 
     init() {
-        return inject(UserApi).me(inject(DestroyRef)).pipe(tap({
-            next: () => {
-               this._isLoggedIn = true;
-            },
-            error: () => {
-                this._isLoggedIn = false;
-            }
-        }));
+        return inject(UserApi)
+            .me(inject(DestroyRef))
+            .pipe(
+                tap({
+                    next: () => {
+                        this._isLoggedIn = true;
+                    },
+                    error: () => {
+                        this._isLoggedIn = false;
+                    },
+                }),
+                catchError((err) => EMPTY),
+            );
     }
 }
