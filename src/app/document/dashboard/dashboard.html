@@ -1,1 +1,24 @@
-<p>dashboard works!</p>
+<div class="text-center pt-8 px-8">
+    <button class="text-center" (click)="openNameDialog()">Add new document</button>
+
+    <div class="mt-8 text-left">
+        @for (document of documents(); track document.id) {
+            <div>
+                <a [routerLink]="document.id">{{document.title}}</a>
+            </div>
+        }
+    </div>
+</div>
+
+<dialog #nameDialog>
+    <div class="fixed inset-0 justify-items-center content-center">
+        <div class="border-accent border-4 w-fit p-8 rounded">
+            <h1 class="mb-8 text-xl font-bold">Specify the name of the new document</h1>
+            <input [(ngModel)]="newDocumentName" class="w-full" type="text" />
+            <div class="text-right mt-8">
+                <button (click)="closeNameDialog()" class="mr-4">Cancel</button>
+                <button (click)="submitNewDocRequest()">Create</button>
+            </div>
+        </div>
+    </div>
+</dialog>

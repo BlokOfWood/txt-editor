@@ -2,6 +2,7 @@ import { DestroyRef, inject, Injectable } from '@angular/core';
 import { UserApi } from './api/user.api';
 import { catchError, EMPTY, tap } from 'rxjs';
 
+// TODO: handle expiry that happens while the user is logged in
 @Injectable({
     providedIn: 'root',
 })

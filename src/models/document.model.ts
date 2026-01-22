@@ -4,3 +4,7 @@ export type DocumentBriefDto = {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export type CreateDocumentDto = {
+    title: string;
+}

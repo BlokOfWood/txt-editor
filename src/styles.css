@@ -32,7 +32,7 @@
     }
 
     input {
-        @apply bg-secondary;
+        @apply bg-secondary p-1;
     }
 
     a {

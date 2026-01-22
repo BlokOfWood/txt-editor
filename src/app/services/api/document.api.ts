@@ -1,6 +1,6 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { Api } from './api';
-import { DocumentBriefDto } from '../../../models/document.model';
+import { CreateDocumentDto, DocumentBriefDto } from '../../../models/document.model';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -11,5 +11,9 @@ export class DocumentApi {
 
     getDocumentBriefs(destroyRef: DestroyRef): Observable<DocumentBriefDto[]> {
         return this.api.get('document', destroyRef);
+    }
+
+    createNewDocument(createDocumentRequest: CreateDocumentDto, destroyRef: DestroyRef): Observable<void> {
+        return this.api.post('document', createDocumentRequest, destroyRef)
     }
 }
