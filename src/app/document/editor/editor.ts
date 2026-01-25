@@ -1,22 +1,47 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { DocumentDto } from '../../../models/document.model';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs';
+import { DocumentApi } from '../../services/api/document.api';
 
 @Component({
     selector: 'app-editor',
-    imports: [FormsModule],
+    imports: [FormsModule, RouterLink],
     templateUrl: './editor.html',
     styleUrl: './editor.css',
 })
 export class Editor {
+    // TODO: Add ability to modify title
+    documentApi = inject(DocumentApi);
     route = inject(ActivatedRoute);
+    destroyRef = inject(DestroyRef);
 
+    textEncoder = new TextEncoder()
+
+    documentId: string = '';
+    title = signal('');
     content = signal('');
+    contentAsB64 = computed(() => (this.textEncoder.encode(this.content()) as any).toBase64())
 
     constructor() {
+        this.route.params.subscribe((params) => this.documentId = params['id']);
+
         this.route.data.subscribe((data) => {
-            this.content = data['document'].content;
+            this.title.set(data['document'].title);
+            this.content.set(data['document'].content);
         });
+
+        toObservable(this.content)
+            .pipe(debounceTime(500))
+            .subscribe((newValue) => {
+                console.log('wa')
+
+                this.documentApi.modifyDocument(
+                    this.documentId,
+                    { text: newValue },
+                    this.destroyRef,
+                ).subscribe();
+            });
     }
 }

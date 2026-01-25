@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
     --color-primary: #e1aa74;
@@ -40,6 +40,10 @@
     }
 
     button {
-        @apply bg-primary px-4 py-2 rounded;
+        @apply bg-primary px-4 py-2 rounded  hover:bg-accent hover:underline transition-colors duration-100 cursor-pointer;
+    }
+
+    h1 {
+        @apply text-xl;
     }
 }

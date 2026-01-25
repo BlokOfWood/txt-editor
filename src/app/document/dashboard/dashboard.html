@@ -13,7 +13,7 @@
 <dialog #nameDialog>
     <div class="fixed inset-0 justify-items-center content-center">
         <div class="border-accent border-4 w-fit p-8 rounded">
-            <h1 class="mb-8 text-xl font-bold">Specify the name of the new document</h1>
+            <h1 class="mb-8 font-bold">Specify the name of the new document</h1>
             <input [(ngModel)]="newDocumentName" class="w-full" type="text" />
             <div class="text-right mt-8">
                 <button (click)="closeNameDialog()" class="mr-4">Cancel</button>
