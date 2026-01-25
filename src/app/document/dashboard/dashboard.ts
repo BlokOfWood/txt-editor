@@ -49,6 +49,7 @@ export class Dashboard {
     }
 
     constructor() {
+        // TODO: actually use resolver data
         this.documentApi
             .getDocumentBriefs(this.destroyRef)
             .subscribe((documentDtos) => this.documents.set(documentDtos));

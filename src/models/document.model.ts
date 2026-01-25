@@ -5,6 +5,15 @@ export type DocumentBriefDto = {
     updatedAt: Date;
 }
 
+export type DocumentDto = {
+    title: string;
+    content: string;
+}
+
 export type CreateDocumentDto = {
     title: string;
+}
+
+export type ModifyDocumentDto = {
+    text: string;
 }

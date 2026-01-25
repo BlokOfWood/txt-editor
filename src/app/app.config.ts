@@ -1,4 +1,11 @@
-import { ApplicationConfig, inject, PLATFORM_ID, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+    ApplicationConfig,
+    inject,
+    PLATFORM_ID,
+    provideAppInitializer,
+    provideBrowserGlobalErrorListeners,
+    provideZonelessChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -8,12 +15,14 @@ import { User } from './services/user';
 import { isPlatformBrowser } from '@angular/common';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes), provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch()),
-    provideAppInitializer(appInit)
-  ]
+    providers: [
+        provideBrowserGlobalErrorListeners(),
+        provideRouter(routes),
+        provideClientHydration(withEventReplay()),
+        provideHttpClient(withFetch()),
+        provideAppInitializer(appInit),
+        provideZonelessChangeDetection(),
+    ],
 };
 
 function appInit() {

@@ -5,6 +5,8 @@ import { Dashboard } from './document/dashboard/dashboard';
 import { isLoggedInTsGuard } from './guards/is-logged-in.ts-guard';
 import { isLoggedOutTsGuard } from './guards/is-logged-out.ts-guard';
 import { documentsResolver } from './resolvers/documents-resolver';
+import { Editor } from './document/editor/editor';
+import { documentResolver } from './resolvers/document-resolver';
 
 export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -17,6 +19,11 @@ export const routes: Routes = [
                 path: '',
                 component: Dashboard,
                 resolve: { documents: documentsResolver },
+            },
+            {
+                path: ':id',
+                component: Editor,
+                resolve: { document: documentResolver },
             },
         ],
         canActivate: [isLoggedInTsGuard],
