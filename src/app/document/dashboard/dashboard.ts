@@ -11,7 +11,7 @@ import { DocumentApi } from '../../services/api/document.api';
 import { FormsModule } from '@angular/forms';
 import { Message } from '../../../models/ui.model';
 import { DocumentBriefDto } from '../../../models/document.model';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-dashboard',
@@ -21,6 +21,7 @@ import { RouterLink } from '@angular/router';
 })
 export class Dashboard {
     private documentApi = inject(DocumentApi);
+    private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
 
     nameDialog = viewChild.required<ElementRef<HTMLDialogElement>>('nameDialog');
@@ -44,14 +45,19 @@ export class Dashboard {
             .subscribe({
                 next: () => {
                     this.closeNameDialog();
+
+                    this.documentApi
+                        .getDocumentBriefs(this.destroyRef)
+                        .subscribe((newDocuments) => {
+                            this.documents.set(newDocuments);
+                        });
                 },
             });
     }
 
     constructor() {
-        // TODO: actually use resolver data
-        this.documentApi
-            .getDocumentBriefs(this.destroyRef)
-            .subscribe((documentDtos) => this.documents.set(documentDtos));
+        this.route.data.subscribe((data) => {
+            this.documents.set(data['documents']);
+        });
     }
 }
