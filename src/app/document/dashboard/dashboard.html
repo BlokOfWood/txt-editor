@@ -12,13 +12,13 @@
 
 <dialog #nameDialog>
     <div class="fixed inset-0 justify-items-center content-center">
-        <div class="border-accent border-4 w-fit p-8 rounded">
+        <form class="border-accent border-4 w-fit p-8 rounded" (submit)="submitNewDocRequest()">
             <h1 class="mb-8 font-bold">Specify the name of the new document</h1>
-            <input [(ngModel)]="newDocumentName" class="w-full" type="text" />
+            <input name="newDocumentName" [(ngModel)]="newDocumentName" class="w-full" type="text" />
             <div class="text-right mt-8">
-                <button (click)="closeNameDialog()" class="mr-4">Cancel</button>
-                <button (click)="submitNewDocRequest()">Create</button>
+                <button type="button" (click)="closeNameDialog()" class="mr-4">Cancel</button>
+                <button>Create</button>
             </div>
-        </div>
+        </form>
     </div>
 </dialog>
