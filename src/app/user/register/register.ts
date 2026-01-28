@@ -5,10 +5,12 @@ import { UserApi } from '../../services/api/user.api';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from "@angular/common";
 import { Router, RouterLink } from "@angular/router";
+import { MessageComponent } from "../../reusable-components/message/message";
+import { MessageKey } from '../../../models/ui.model';
 
 @Component({
     selector: 'app-register',
-    imports: [Field, CommonModule, RouterLink],
+    imports: [Field, CommonModule, RouterLink, MessageComponent],
     templateUrl: './register.html',
     styleUrl: './register.css',
 })
@@ -17,7 +19,7 @@ export class Register {
     private destroyRef = inject(DestroyRef);
     private router = inject(Router);
 
-    message = signal<{ message: string, type: "error" | "info" } | null>(null);
+    message = signal<MessageKey>(null);
 
     registerModel = signal<RegisterDto & { confirmPassword: string }>({ username: "", password: "", confirmPassword: "" });
     registerForm = form(this.registerModel);
@@ -28,7 +30,7 @@ export class Register {
         event.preventDefault();
 
         if (this.registerForm().value().password !== this.registerForm().value().confirmPassword) {
-            this.message.set({ message: "Passwords do not match.", type: "error" });
+            this.message.set('PASSWORDS_DONT_MATCH');
             return;
         }
 
@@ -38,7 +40,7 @@ export class Register {
             error: (error: HttpErrorResponse) => {
                 switch (error.status) {
                     case 200:
-                        this.message.set({ message: "Registration successful! You will now be redirected to the login page.", type: "info" });
+                        this.message.set('SUCCESSFUL_REGISTRATION');
 
                         const timeoutId = setTimeout(() => {
                             this.router.navigate(['/login']);
@@ -50,16 +52,16 @@ export class Register {
 
                         return;
                     case 0:
-                        this.message.set({ message: "Could not connect to server.", type: "error" });
+                        this.message.set('CONNECTION_FAILED');
                         return;
                     case 409:
-                        this.message.set({ message: "Username already exists.", type: "error" });
+                        this.message.set('USERNAME_DUPLICATE');
                         return;
                     case 500:
-                        this.message.set({ message: "A server error occurred. Please try again later.", type: "error" });
+                        this.message.set('SERVER_ERROR');
                         return;
                     default:
-                        this.message.set({ message: `An unknown error occurred. (Status code: ${error.status})`, type: "error" });
+                        this.message.set('UNKNOWN_ERROR');
                         return;
                 }
             }

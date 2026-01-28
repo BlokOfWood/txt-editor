@@ -5,9 +5,7 @@
             Tip: If you drag a text file over the document list, it will be imported.
         </div>
 
-        <div [class.text-red-500]="message()?.type === 'error'" class="h-6 my-4">
-            {{ message()?.message }}
-        </div>
+        <message [messageKey]="message()"></message>
 
         <div class="mt-8 text-left">
             @for (document of documents(); track document.id) {
@@ -23,9 +21,7 @@
     <div class="fixed inset-0 justify-items-center content-center">
         <form class="border-accent border-4 w-fit p-8 rounded" (submit)="submitNewDocRequest()">
             <h1 class="mb-2 font-bold">Specify the name of the new document</h1>
-            <div [class.text-red-500]="nameDialogMessage()?.type === 'error'" class="h-6 my-2">
-                {{ nameDialogMessage()?.message }}
-            </div>
+            <message [messageKey]="nameDialogMessage()"></message>
             <input
                 name="newDocumentName"
                 [(ngModel)]="newDocumentName"

@@ -1,5 +1,5 @@
 <form class="absolute inset-0 flex items-center justify-center flex-col gap-8 bg-bg pb-16" (submit)="register($event)">
-    <div class="text-red-500 h-6" [ngClass]="{'text-red-500': message()?.type === 'error'}">{{ message()?.message }}</div>
+    <message [messageKey]="message()"></message>
     <div>
         <label class="text-center block mb-2" for="username">Username</label>
         <input [field]="registerForm.username" class="p-1" id="username" type="text" />

@@ -9,14 +9,15 @@ import {
 } from '@angular/core';
 import { DocumentApi } from '../../services/api/document.api';
 import { FormsModule } from '@angular/forms';
-import { Message, messages } from '../../../models/ui.model';
+import { Message, MessageKey, messages } from '../../../models/ui.model';
 import { DocumentBriefDto } from '../../../models/document.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MessageComponent } from '../../reusable-components/message/message';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, RouterLink],
+    imports: [FormsModule, RouterLink, MessageComponent],
     templateUrl: './dashboard.html',
     styleUrl: './dashboard.css',
     host: {
@@ -30,9 +31,9 @@ export class Dashboard {
     private destroyRef = inject(DestroyRef);
 
     nameDialog = viewChild.required<ElementRef<HTMLDialogElement>>('nameDialog');
-    nameDialogMessage: WritableSignal<Message> = signal(null);
+    nameDialogMessage: WritableSignal<MessageKey> = signal(null);
 
-    message: WritableSignal<Message> = signal(null);
+    message: WritableSignal<MessageKey> = signal(null);
     newDocumentName = signal('');
     documents: WritableSignal<DocumentBriefDto[]> = signal([]);
 
@@ -50,7 +51,7 @@ export class Dashboard {
         files = files.filter((file) => file.type === 'text/plain');
 
         if (files.length === 0) {
-            this.message.set({ message: 'No importable file provided!', type: 'error' });
+            this.message.set('NO_IMPORTABLE_FILE');
             return;
         }
 
@@ -88,12 +89,9 @@ export class Dashboard {
                 },
                 error: (err: HttpErrorResponse) => {
                     if (err.status === 409) {
-                        this.nameDialogMessage.set({
-                            type: 'error',
-                            message: messages.DUPLICATE_TITLE,
-                        });
-                    }
-                    else {
+                        this.nameDialogMessage.set('DUPLICATE_TITLE');
+                        console.log(err);
+                    } else {
                         throw err;
                     }
                 },

@@ -4,12 +4,13 @@ import { form, Field } from '@angular/forms/signals';
 import { UserApi } from '../../services/api/user.api';
 import { Router, RouterLink } from "@angular/router";
 import { HttpErrorResponse } from '@angular/common/http';
-import { Message } from '../../../models/ui.model';
+import { Message, MessageKey } from '../../../models/ui.model';
 import { User } from '../../services/user';
+import { MessageComponent } from "../../reusable-components/message/message";
 
 @Component({
     selector: 'app-login',
-    imports: [Field, RouterLink],
+    imports: [Field, RouterLink, MessageComponent],
     templateUrl: './login.html',
     styleUrl: './login.css',
 })
@@ -19,7 +20,7 @@ export class Login {
     private router = inject(Router);
     private userService = inject(User);
 
-    message = signal<Message>(null);
+    message = signal<MessageKey>(null);
 
     loginModel = signal<LoginDto>({ username: "", password: "" });
     loginForm = form(this.loginModel);
@@ -31,7 +32,7 @@ export class Login {
 
         this.userApi.login(this.loginForm().value(), this.destroyRef).pipe().subscribe({
             next: () => {
-                this.message.set({ message: "Login successful!", type: "info" });
+                this.message.set('LOGIN_SUCCESSFUL');
 
                 this.userService.login();
 
@@ -44,13 +45,16 @@ export class Login {
             error: (error: HttpErrorResponse) => {
                 switch (error.status) {
                     case 0:
-                        this.message.set({ message: "Could not connect to server.", type: "error" });
+                        this.message.set('CONNECTION_FAILED');
                         return;
                     case 401:
-                        this.message.set({ message: "Invalid username or password.", type: "error" });
+                        this.message.set('INVALID_LOGIN');
+                        return;
+                    case 500:
+                        this.message.set('SERVER_ERROR');
                         return;
                     default:
-                        this.message.set({ message: `An unknown error occurred. (Status code: ${error.status})`, type: "error" });
+                        this.message.set('UNKNOWN_ERROR');
                         return;
                 }
             }
