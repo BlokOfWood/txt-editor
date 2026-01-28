@@ -9,15 +9,20 @@ import {
 } from '@angular/core';
 import { DocumentApi } from '../../services/api/document.api';
 import { FormsModule } from '@angular/forms';
-import { Message } from '../../../models/ui.model';
+import { Message, messages } from '../../../models/ui.model';
 import { DocumentBriefDto } from '../../../models/document.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
     selector: 'app-dashboard',
     imports: [FormsModule, RouterLink],
     templateUrl: './dashboard.html',
     styleUrl: './dashboard.css',
+    host: {
+        '(drop)': 'handleDrop($event)',
+        '(dragover)': 'handleDragOver($event)',
+    },
 })
 export class Dashboard {
     private documentApi = inject(DocumentApi);
@@ -25,12 +30,41 @@ export class Dashboard {
     private destroyRef = inject(DestroyRef);
 
     nameDialog = viewChild.required<ElementRef<HTMLDialogElement>>('nameDialog');
+    nameDialogMessage: WritableSignal<Message> = signal(null);
 
     message: WritableSignal<Message> = signal(null);
     newDocumentName = signal('');
     documents: WritableSignal<DocumentBriefDto[]> = signal([]);
 
+    handleDrop(event: DragEvent) {
+        event.preventDefault();
+
+        if (!event.dataTransfer) return;
+
+        let files = [...event.dataTransfer.items]
+            .map((item) => item.getAsFile())
+            .filter((item) => item !== null);
+
+        if (files.length === 0) return;
+
+        files = files.filter((file) => file.type === 'text/plain');
+
+        if (files.length === 0) {
+            this.message.set({ message: 'No importable file provided!', type: 'error' });
+            return;
+        }
+
+        this.message.set(null);
+    }
+
+    handleDragOver(event: DragEvent) {
+        //console.log(event)
+        event.preventDefault();
+    }
+
     openNameDialog() {
+        this.nameDialogMessage.set(null);
+
         this.nameDialog().nativeElement.showModal();
         this.newDocumentName.set('');
     }
@@ -46,11 +80,22 @@ export class Dashboard {
                 next: () => {
                     this.closeNameDialog();
 
-                    this.documentApi
-                        .getDocumentBriefs(this.destroyRef)
-                        .subscribe((newDocuments) => {
+                    this.documentApi.getDocumentBriefs(this.destroyRef).subscribe({
+                        next: (newDocuments) => {
                             this.documents.set(newDocuments);
+                        },
+                    });
+                },
+                error: (err: HttpErrorResponse) => {
+                    if (err.status === 409) {
+                        this.nameDialogMessage.set({
+                            type: 'error',
+                            message: messages.DUPLICATE_TITLE,
                         });
+                    }
+                    else {
+                        throw err;
+                    }
                 },
             });
     }
