@@ -35,8 +35,6 @@ export class Editor {
         toObservable(this.content)
             .pipe(debounceTime(500))
             .subscribe((newValue) => {
-                console.log('wa')
-
                 this.documentApi.modifyDocument(
                     this.documentId,
                     { text: newValue },

@@ -9,15 +9,17 @@ import {
 } from '@angular/core';
 import { DocumentApi } from '../../services/api/document.api';
 import { FormsModule } from '@angular/forms';
-import { Message, MessageKey, messages } from '../../../models/ui.model';
+import { MessageKey } from '../../../models/ui.model';
 import { DocumentBriefDto } from '../../../models/document.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MessageComponent } from '../../reusable-components/message/message';
+import { catchError, firstValueFrom, Subscription, tap } from 'rxjs';
+import { LucideAngularModule, Trash2,  } from 'lucide-angular';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [FormsModule, RouterLink, MessageComponent],
+    imports: [FormsModule, RouterLink, MessageComponent, LucideAngularModule],
     templateUrl: './dashboard.html',
     styleUrl: './dashboard.css',
     host: {
@@ -30,6 +32,8 @@ export class Dashboard {
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
 
+    readonly TrashIcon = Trash2;
+
     nameDialog = viewChild.required<ElementRef<HTMLDialogElement>>('nameDialog');
     nameDialogMessage: WritableSignal<MessageKey> = signal(null);
 
@@ -37,25 +41,60 @@ export class Dashboard {
     newDocumentName = signal('');
     documents: WritableSignal<DocumentBriefDto[]> = signal([]);
 
-    handleDrop(event: DragEvent) {
+    async handleDrop(event: DragEvent) {
         event.preventDefault();
 
         if (!event.dataTransfer) return;
 
-        let files = [...event.dataTransfer.items]
+        const files = [...event.dataTransfer.items]
             .map((item) => item.getAsFile())
             .filter((item) => item !== null);
 
         if (files.length === 0) return;
 
-        files = files.filter((file) => file.type === 'text/plain');
+        const textFiles = files.filter((file) => file.type === 'text/plain');
 
-        if (files.length === 0) {
+        if (textFiles.length === 0) {
             this.message.set('NO_IMPORTABLE_FILE');
             return;
         }
 
         this.message.set(null);
+
+        let addedFileCount = 0;
+
+        try {
+            Promise.all(
+                files.map(async (file) =>
+                    firstValueFrom(
+                        this.documentApi
+                            .createNewDocument(
+                                {
+                                    title: file.name.endsWith('.txt')
+                                        ? file.name.slice(0, -4)
+                                        : file.name,
+                                    content: await file.text(),
+                                },
+                                this.destroyRef,
+                            )
+                            .pipe(
+                                tap(() => addedFileCount++),
+                                catchError(() => [{}]),
+                            ),
+                    ),
+                ),
+            ).then(() => {
+                if (addedFileCount !== 0) this.updateDocumentBriefs();
+
+                if (addedFileCount === 0) this.message.set('NO_IMPORTABLE_FILE');
+                else if (addedFileCount !== textFiles.length)
+                    this.message.set('SOME_FILES_UNIMPORTABLE');
+                else this.message.set('ALL_FILES_SUCCESSFULLY_IMPORTED');
+            });
+        } catch (error) {
+            console.error('Failed to read files!', error);
+            this.message.set('FILE_READ_FAIL');
+        }
     }
 
     handleDragOver(event: DragEvent) {
@@ -94,6 +133,20 @@ export class Dashboard {
                     } else {
                         throw err;
                     }
+                },
+            });
+    }
+
+    private briefsUpdateSubscription: Subscription | null = null;
+
+    updateDocumentBriefs() {
+        this.briefsUpdateSubscription?.unsubscribe();
+
+        this.briefsUpdateSubscription = this.documentApi
+            .getDocumentBriefs(this.destroyRef)
+            .subscribe({
+                next: (documentBriefs) => {
+                    this.documents.set(documentBriefs);
                 },
             });
     }

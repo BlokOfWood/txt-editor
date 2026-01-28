@@ -12,6 +12,7 @@ export type DocumentDto = {
 
 export type CreateDocumentDto = {
     title: string;
+    content?: string;
 }
 
 export type ModifyDocumentDto = {

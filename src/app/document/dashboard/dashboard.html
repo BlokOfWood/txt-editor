@@ -9,8 +9,15 @@
 
         <div class="mt-8 text-left">
             @for (document of documents(); track document.id) {
-                <div>
-                    <a [routerLink]="document.id">{{ document.title }}</a>
+                <div class="group flex justify-between py-0.5">
+                    <a class="grow bg-transparent" [routerLink]="document.id"
+                        ><span class="bg-primary px-1">{{ document.title }}</span></a
+                    >
+                    <button
+                        class="p-0 rounded-none bg-red-500 hidden group-hover:inline size-6 content-center hover:underline"
+                    >
+                        <i-lucide [img]="TrashIcon" size="16" class="justify-items-center block"></i-lucide>
+                    </button>
                 </div>
             }
         </div>
