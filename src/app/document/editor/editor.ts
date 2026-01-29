@@ -17,29 +17,35 @@ export class Editor {
     route = inject(ActivatedRoute);
     destroyRef = inject(DestroyRef);
 
-    textEncoder = new TextEncoder()
+    textEncoder = new TextEncoder();
 
     documentId: string = '';
     title = signal('');
     content = signal('');
-    contentAsB64 = computed(() => (this.textEncoder.encode(this.content()) as any).toBase64())
+    contentAsB64 = computed(() => (this.textEncoder.encode(this.content()) as any).toBase64());
 
     constructor() {
-        this.route.params.subscribe((params) => this.documentId = params['id']);
+        this.route.params.subscribe((params) => (this.documentId = params['id']));
 
         this.route.data.subscribe((data) => {
             this.title.set(data['document'].title);
             this.content.set(data['document'].content);
         });
 
+        toObservable(this.title)
+            .pipe(debounceTime(500))
+            .subscribe((newValue) => {
+                this.documentApi
+                    .modifyDocument(this.documentId, { title: newValue }, this.destroyRef)
+                    .subscribe();
+            });
+
         toObservable(this.content)
             .pipe(debounceTime(500))
             .subscribe((newValue) => {
-                this.documentApi.modifyDocument(
-                    this.documentId,
-                    { text: newValue },
-                    this.destroyRef,
-                ).subscribe();
+                this.documentApi
+                    .modifyDocument(this.documentId, { content: newValue }, this.destroyRef)
+                    .subscribe();
             });
     }
 }

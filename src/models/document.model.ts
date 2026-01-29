@@ -16,5 +16,6 @@ export type CreateDocumentDto = {
 }
 
 export type ModifyDocumentDto = {
-    text: string;
+    title?: string;
+    content?: string;
 }
