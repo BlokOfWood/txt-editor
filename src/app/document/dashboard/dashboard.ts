@@ -15,7 +15,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MessageComponent } from '../../reusable-components/message/message';
 import { catchError, firstValueFrom, Subscription, tap } from 'rxjs';
-import { LucideAngularModule, Trash2,  } from 'lucide-angular';
+import { LucideAngularModule, Trash2 } from 'lucide-angular';
 
 @Component({
     selector: 'app-dashboard',
@@ -33,6 +33,9 @@ export class Dashboard {
     private destroyRef = inject(DestroyRef);
 
     readonly TrashIcon = Trash2;
+
+    deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>('deleteConfirmDialog');
+    toBeDeletedDocument = signal<DocumentBriefDto | null>(null);
 
     nameDialog = viewChild.required<ElementRef<HTMLDialogElement>>('nameDialog');
     nameDialogMessage: WritableSignal<MessageKey> = signal(null);
@@ -95,6 +98,34 @@ export class Dashboard {
             console.error('Failed to read files!', error);
             this.message.set('FILE_READ_FAIL');
         }
+    }
+
+    openDeleteDialog(idx: number) {
+        this.deleteDialog().nativeElement.showModal();
+        this.toBeDeletedDocument.set(this.documents()[idx]);
+    }
+
+    submitDeleteDocRequest() {
+        const documentToBeDeleted = this.toBeDeletedDocument();
+        if (documentToBeDeleted === null) {
+            throw 'Tried to delete document when none where opened.';
+        }
+
+        this.documentApi.deleteDocument(documentToBeDeleted.id, this.destroyRef).subscribe({
+            next: () => {
+                this.updateDocumentBriefs();
+                this.closeDeleteDialog();
+                this.message.set('SUCCESSFUL_DELETE');
+            },
+            error: () => {
+                this.message.set('FAILED_TO_DELETE');
+            },
+        });
+    }
+
+    closeDeleteDialog() {
+        this.toBeDeletedDocument.set(null);
+        this.deleteDialog().nativeElement.close();
     }
 
     handleDragOver(event: DragEvent) {

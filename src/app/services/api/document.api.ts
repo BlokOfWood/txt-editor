@@ -24,4 +24,8 @@ export class DocumentApi {
     modifyDocument(id: string, newContent: ModifyDocumentDto, destroyRef: DestroyRef): Observable<void> {
         return this.api.post(`document/${id}`, newContent, destroyRef);
     }
+
+    deleteDocument(id: string, destroyRef: DestroyRef): Observable<void> {
+        return this.api.delete(`document/${id}`, destroyRef);
+    }
 }

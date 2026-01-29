@@ -22,6 +22,10 @@ export class Api {
         return this.http.post<T>(this.constructUrl(endpoint), body, { ...options, withCredentials: true }).pipe(takeUntilDestroyed(destroyRef));
     }
 
+    delete<T>(endpoint: string, destroyRef: DestroyRef, options?: Parameters<typeof this.http.post>[2]): Observable<T> {
+        return this.http.delete<T>(this.constructUrl(endpoint), { ...options, withCredentials: true }).pipe(takeUntilDestroyed(destroyRef));
+    }
+
     constructor() {
         if (this.baseAddress.endsWith("/")) {
             throw `API base address cannot end in slash. (${this.baseAddress})`;

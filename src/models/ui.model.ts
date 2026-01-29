@@ -22,4 +22,6 @@ export const messages = {
     USERNAME_DUPLICATE: { message: 'Username already exists.', type: 'error' },
     SERVER_ERROR: { message: 'A server error occurred. Please try again later.', type: 'error' },
     FILE_READ_FAIL: { message: 'Failed to read some provided files.', type: 'error' },
-} as const;
+    FAILED_TO_DELETE: { message: 'Failed to delete document.', type: 'error' },
+    SUCCESSFUL_DELETE: { message: 'Successfully deleted document', type: 'info' },
+};

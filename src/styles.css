@@ -8,6 +8,7 @@
     --color-secondary: #ffce9d;
     --color-accent: #ffc388;
     --color-text: black;
+    --color-danger: #fb2c36;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +18,7 @@
         --color-secondary: #100a1c;
         --color-accent: #a048ff;
         --color-text: #fbe8ff;
+        --color-danger: #fb2c36;
     }
 }
 
