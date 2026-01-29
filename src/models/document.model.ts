@@ -1,8 +1,8 @@
 export type DocumentBriefDto = {
     id: string;
     title: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export type DocumentDto = {

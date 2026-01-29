@@ -8,16 +8,26 @@
         <message [messageKey]="message()"></message>
 
         <div class="mt-8 text-left">
+            <div class="py-0.5 grid grid-cols-[1fr_120px_1.5rem] group gap-x-4 font-bold mb-2">
+                <div class="pl-0.5"></div>
+                <div class="text-center">Last modified</div>
+                <div></div>
+            </div>
             @for (document of documents(); track document.id; let index = $index) {
-                <div class="group flex justify-between py-0.5">
-                    <a class="grow bg-transparent" [routerLink]="document.id"
+                <div class="py-0.5 grid grid-cols-[1fr_120px_1.5rem] group gap-x-4">
+                    <a class="grow bg-transparent px-0" [routerLink]="document.id"
                         ><span class="bg-primary px-1">{{ document.title }}</span></a
                     >
+                    <div class="text-center">{{document.updatedAt.toLocaleDateString()}}</div>
                     <button
                         class="p-0 rounded-none bg-danger hidden group-hover:inline size-6 content-center hover:underline"
                         (click)="openDeleteDialog(index)"
                     >
-                        <i-lucide [img]="TrashIcon" size="16" class="justify-items-center block"></i-lucide>
+                        <i-lucide
+                            [img]="TrashIcon"
+                            size="16"
+                            class="justify-items-center block"
+                        ></i-lucide>
                     </button>
                 </div>
             }
@@ -47,7 +57,10 @@
 <dialog #deleteConfirmDialog>
     <div class="fixed inset-0 justify-items-center content-center">
         <form class="border-accent border-4 w-fit p-8 rounded" (submit)="submitDeleteDocRequest()">
-            <h1 class="mb-2 font-bold">Are you sure you want to delete the following document: {{toBeDeletedDocument()?.title}}?</h1>
+            <h1 class="mb-2 font-bold">
+                Are you sure you want to delete the following document:
+                {{ toBeDeletedDocument()?.title }}?
+            </h1>
             <div class="text-right mt-8">
                 <button type="button" (click)="closeDeleteDialog()" class="mr-4">Cancel</button>
                 <button class="bg-danger">Delete</button>

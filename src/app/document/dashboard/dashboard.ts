@@ -1,5 +1,6 @@
 import {
     Component,
+    computed,
     DestroyRef,
     ElementRef,
     inject,
@@ -42,7 +43,15 @@ export class Dashboard {
 
     message: WritableSignal<MessageKey> = signal(null);
     newDocumentName = signal('');
-    documents: WritableSignal<DocumentBriefDto[]> = signal([]);
+    documentResponse: WritableSignal<DocumentBriefDto[]> = signal([]);
+    documents = computed(() =>
+        this.documentResponse().map((doc) => ({
+            id: doc.id,
+            title: doc.title,
+            updatedAt: new Date(doc.updatedAt),
+            createdAt: new Date(doc.createdAt),
+        })),
+    );
 
     async handleDrop(event: DragEvent) {
         event.preventDefault();
@@ -102,7 +111,7 @@ export class Dashboard {
 
     openDeleteDialog(idx: number) {
         this.deleteDialog().nativeElement.showModal();
-        this.toBeDeletedDocument.set(this.documents()[idx]);
+        this.toBeDeletedDocument.set(this.documentResponse()[idx]);
     }
 
     submitDeleteDocRequest() {
@@ -153,7 +162,7 @@ export class Dashboard {
 
                     this.documentApi.getDocumentBriefs(this.destroyRef).subscribe({
                         next: (newDocuments) => {
-                            this.documents.set(newDocuments);
+                            this.documentResponse.set(newDocuments);
                         },
                     });
                 },
@@ -177,14 +186,14 @@ export class Dashboard {
             .getDocumentBriefs(this.destroyRef)
             .subscribe({
                 next: (documentBriefs) => {
-                    this.documents.set(documentBriefs);
+                    this.documentResponse.set(documentBriefs);
                 },
             });
     }
 
     constructor() {
         this.route.data.subscribe((data) => {
-            this.documents.set(data['documents']);
+            this.documentResponse.set(data['documents']);
         });
     }
 }
