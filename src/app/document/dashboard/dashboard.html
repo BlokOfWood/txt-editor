@@ -58,9 +58,9 @@
     <div class="fixed inset-0 justify-items-center content-center">
         <form class="border-accent border-4 w-fit p-8 rounded" (submit)="submitDeleteDocRequest()">
             <h1 class="mb-2 font-bold">
-                Are you sure you want to delete the following document:
-                {{ toBeDeletedDocument()?.title }}?
+                Are you sure you want to delete the following document?
             </h1>
+            <input type="text" class="focus:outline-0 bg-transparent w-full text-center text-xl font-bold underline" readonly [value]="toBeDeletedDocument()?.title" >
             <div class="text-right mt-8">
                 <button type="button" (click)="closeDeleteDialog()" class="mr-4">Cancel</button>
                 <button class="bg-danger">Delete</button>

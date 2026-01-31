@@ -110,8 +110,8 @@ export class Dashboard {
     }
 
     openDeleteDialog(idx: number) {
-        this.deleteDialog().nativeElement.showModal();
         this.toBeDeletedDocument.set(this.documentResponse()[idx]);
+        this.deleteDialog().nativeElement.showModal();
     }
 
     submitDeleteDocRequest() {
@@ -138,15 +138,14 @@ export class Dashboard {
     }
 
     handleDragOver(event: DragEvent) {
-        //console.log(event)
         event.preventDefault();
     }
 
     openNameDialog() {
         this.nameDialogMessage.set(null);
+        this.newDocumentName.set('');
 
         this.nameDialog().nativeElement.showModal();
-        this.newDocumentName.set('');
     }
 
     closeNameDialog() {
