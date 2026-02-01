@@ -1,5 +1,5 @@
-<div class="w-screen h-screen justify-items-center">
-    <div class="text-center pt-8 px-8 max-w-200 w-full">
+<div class="absolute left-0 right-0 top-0 min-h-screen h-fit justify-items-center">
+    <div class="text-center py-4 px-8 max-w-200 w-full">
         <button class="text-center" (click)="openNameDialog()">Add new document</button>
         <div class="mt-1 text-sm text-text/60">
             Tip: If you drag a text file over the document list, it will be imported.
@@ -18,7 +18,7 @@
                     <a class="grow bg-transparent px-0" [routerLink]="document.id"
                         ><span class="bg-primary px-1">{{ document.title }}</span></a
                     >
-                    <div class="text-center">{{document.updatedAt.toLocaleDateString()}}</div>
+                    <div class="text-center">{{ document.updatedAt.toLocaleDateString() }}</div>
                     <button
                         class="p-0 rounded-none bg-danger hidden group-hover:inline size-6 content-center hover:underline"
                         (click)="openDeleteDialog(index)"
@@ -32,12 +32,34 @@
                 </div>
             }
         </div>
+
+        <div class="mt-4 flex justify-center items-center gap-4">
+            <button class="w-fit aspect-square p-1" (click)="goToPrevPage()">
+                <i-lucide [img]="ArrowLeft" size="20" />
+            </button>
+            <input
+                class="w-16 no-spinner text-center"
+                [(ngModel)]="currentPageNumber"
+                (change)="changePageNumber()"
+                min="1"
+                [max]="totalPageCount()"
+                type="number"
+            />
+            <div>/</div>
+            <div>{{ totalPageCount() }}</div>
+            <button (click)="goToNextPage()" class="w-fit aspect-square p-1">
+                <i-lucide [img]="ArrowRight" size="20" />
+            </button>
+        </div>
     </div>
 </div>
 
 <dialog #nameDialog>
     <div class="fixed inset-0 justify-items-center content-center">
-        <form class="border-accent bg-bg border-4 w-fit p-8 rounded" (submit)="submitNewDocRequest()">
+        <form
+            class="border-accent bg-bg border-4 w-fit p-8 rounded"
+            (submit)="submitNewDocRequest()"
+        >
             <h1 class="mb-2 font-bold">Specify the name of the new document</h1>
             <message [messageKey]="nameDialogMessage()"></message>
             <input
@@ -56,11 +78,17 @@
 
 <dialog #deleteConfirmDialog>
     <div class="fixed inset-0 justify-items-center content-center">
-        <form class="border-accent bg-bg border-4 w-fit p-8 rounded" (submit)="submitDeleteDocRequest()">
-            <h1 class="mb-2 font-bold">
-                Are you sure you want to delete the following document?
-            </h1>
-            <input type="text" class="focus:outline-0 bg-transparent w-full text-center text-xl font-bold underline" readonly [value]="toBeDeletedDocument()?.title" >
+        <form
+            class="border-accent bg-bg border-4 w-fit p-8 rounded"
+            (submit)="submitDeleteDocRequest()"
+        >
+            <h1 class="mb-2 font-bold">Are you sure you want to delete the following document?</h1>
+            <input
+                type="text"
+                class="focus:outline-0 bg-transparent w-full text-center text-xl font-bold underline"
+                readonly
+                [value]="toBeDeletedDocument()?.title"
+            />
             <div class="text-right mt-8">
                 <button type="button" (click)="closeDeleteDialog()" class="mr-4">Cancel</button>
                 <button class="bg-danger">Delete</button>

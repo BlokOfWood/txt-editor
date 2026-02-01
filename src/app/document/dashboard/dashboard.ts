@@ -2,6 +2,7 @@ import {
     Component,
     computed,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     signal,
@@ -11,12 +12,12 @@ import {
 import { DocumentApi } from '../../services/api/document.api';
 import { FormsModule } from '@angular/forms';
 import { MessageKey } from '../../../models/ui.model';
-import { DocumentBriefDto } from '../../../models/document.model';
+import { DocumentBrief, DocumentBriefsDto } from '../../../models/document.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MessageComponent } from '../../reusable-components/message/message';
 import { catchError, firstValueFrom, Subscription, tap } from 'rxjs';
-import { LucideAngularModule, Trash2 } from 'lucide-angular';
+import { ArrowLeft, ArrowRight, LucideAngularModule, Trash2 } from 'lucide-angular';
 
 @Component({
     selector: 'app-dashboard',
@@ -29,29 +30,153 @@ import { LucideAngularModule, Trash2 } from 'lucide-angular';
     },
 })
 export class Dashboard {
+    static readonly DOCUMENTS_PER_PAGE = 50;
+
     private documentApi = inject(DocumentApi);
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
 
     readonly TrashIcon = Trash2;
-
-    deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>('deleteConfirmDialog');
-    toBeDeletedDocument = signal<DocumentBriefDto | null>(null);
-
-    nameDialog = viewChild.required<ElementRef<HTMLDialogElement>>('nameDialog');
-    nameDialogMessage: WritableSignal<MessageKey> = signal(null);
+    readonly ArrowLeft = ArrowLeft;
+    readonly ArrowRight = ArrowRight;
 
     message: WritableSignal<MessageKey> = signal(null);
-    newDocumentName = signal('');
-    documentResponse: WritableSignal<DocumentBriefDto[]> = signal([]);
+
+    documentResponse: WritableSignal<DocumentBriefsDto> = signal({
+        documentBriefs: [],
+        totalDocumentCount: 0,
+    });
     documents = computed(() =>
-        this.documentResponse().map((doc) => ({
+        this.documentResponse().documentBriefs.map((doc) => ({
             id: doc.id,
             title: doc.title,
             updatedAt: new Date(doc.updatedAt),
             createdAt: new Date(doc.createdAt),
         })),
     );
+
+    currentPageNumber = signal(1);
+    totalPageCount = computed(() =>
+        Math.ceil(this.documentResponse().totalDocumentCount / Dashboard.DOCUMENTS_PER_PAGE),
+    );
+
+    deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>('deleteConfirmDialog');
+    toBeDeletedDocument = signal<DocumentBrief | null>(null);
+
+    nameDialog = viewChild.required<ElementRef<HTMLDialogElement>>('nameDialog');
+    nameDialogMessage: WritableSignal<MessageKey> = signal(null);
+    newDocumentName = signal('');
+
+    changePageNumber() {
+        const newValue = this.currentPageNumber();
+
+        if (newValue === null || Number.isNaN(newValue)) return;
+
+        if (newValue < 1) this.currentPageNumber.set(1);
+        else if (newValue > this.totalPageCount())
+            this.currentPageNumber.set(this.totalPageCount());
+        else if (newValue % 1 !== 0) {
+            this.currentPageNumber.set(Math.floor(newValue));
+        }
+
+        this.updateDocumentBriefs();
+    }
+
+    goToPrevPage() {
+        if (this.currentPageNumber() == 1) {
+            return;
+        }
+
+        this.currentPageNumber.update((pageNumber) => pageNumber - 1);
+
+        this.updateDocumentBriefs();
+    }
+
+    goToNextPage() {
+        if (this.currentPageNumber() == this.totalPageCount()) {
+            return;
+        }
+
+        this.currentPageNumber.update((pageNumber) => pageNumber + 1);
+
+        this.updateDocumentBriefs();
+    }
+
+    openDeleteDialog(idx: number) {
+        this.toBeDeletedDocument.set(this.documentResponse().documentBriefs[idx]);
+        this.deleteDialog().nativeElement.showModal();
+    }
+
+    closeDeleteDialog() {
+        this.toBeDeletedDocument.set(null);
+        this.deleteDialog().nativeElement.close();
+    }
+
+    submitDeleteDocRequest() {
+        const documentToBeDeleted = this.toBeDeletedDocument();
+        if (documentToBeDeleted === null) {
+            throw 'Tried to delete document when none where opened.';
+        }
+
+        this.documentApi.deleteDocument(documentToBeDeleted.id, this.destroyRef).subscribe({
+            next: () => {
+                this.updateDocumentBriefs();
+                this.closeDeleteDialog();
+                this.message.set('SUCCESSFUL_DELETE');
+            },
+            error: () => {
+                this.message.set('FAILED_TO_DELETE');
+            },
+        });
+    }
+
+    openNameDialog() {
+        this.nameDialogMessage.set(null);
+        this.newDocumentName.set('');
+
+        this.nameDialog().nativeElement.showModal();
+    }
+
+    closeNameDialog() {
+        this.nameDialog().nativeElement.close();
+    }
+
+    submitNewDocRequest() {
+        this.documentApi
+            .createNewDocument({ title: this.newDocumentName() }, this.destroyRef)
+            .subscribe({
+                next: () => {
+                    this.closeNameDialog();
+                    this.updateDocumentBriefs();
+                },
+                error: (err: HttpErrorResponse) => {
+                    if (err.status === 409) {
+                        this.nameDialogMessage.set('DUPLICATE_TITLE');
+                        console.log(err);
+                    } else {
+                        throw err;
+                    }
+                },
+            });
+    }
+
+    private briefsUpdateSubscription: Subscription | null = null;
+
+    updateDocumentBriefs() {
+        this.briefsUpdateSubscription?.unsubscribe();
+
+        this.briefsUpdateSubscription = this.documentApi
+            .getDocumentBriefs(
+                Dashboard.DOCUMENTS_PER_PAGE * (this.currentPageNumber() - 1),
+                Dashboard.DOCUMENTS_PER_PAGE,
+                this.destroyRef,
+            )
+            .subscribe({
+                next: (documentBriefs) => {
+                    this.documentResponse.set(documentBriefs);
+                },
+            });
+    }
 
     async handleDrop(event: DragEvent) {
         event.preventDefault();
@@ -109,85 +234,8 @@ export class Dashboard {
         }
     }
 
-    openDeleteDialog(idx: number) {
-        this.toBeDeletedDocument.set(this.documentResponse()[idx]);
-        this.deleteDialog().nativeElement.showModal();
-    }
-
-    submitDeleteDocRequest() {
-        const documentToBeDeleted = this.toBeDeletedDocument();
-        if (documentToBeDeleted === null) {
-            throw 'Tried to delete document when none where opened.';
-        }
-
-        this.documentApi.deleteDocument(documentToBeDeleted.id, this.destroyRef).subscribe({
-            next: () => {
-                this.updateDocumentBriefs();
-                this.closeDeleteDialog();
-                this.message.set('SUCCESSFUL_DELETE');
-            },
-            error: () => {
-                this.message.set('FAILED_TO_DELETE');
-            },
-        });
-    }
-
-    closeDeleteDialog() {
-        this.toBeDeletedDocument.set(null);
-        this.deleteDialog().nativeElement.close();
-    }
-
     handleDragOver(event: DragEvent) {
         event.preventDefault();
-    }
-
-    openNameDialog() {
-        this.nameDialogMessage.set(null);
-        this.newDocumentName.set('');
-
-        this.nameDialog().nativeElement.showModal();
-    }
-
-    closeNameDialog() {
-        this.nameDialog().nativeElement.close();
-    }
-
-    submitNewDocRequest() {
-        this.documentApi
-            .createNewDocument({ title: this.newDocumentName() }, this.destroyRef)
-            .subscribe({
-                next: () => {
-                    this.closeNameDialog();
-
-                    this.documentApi.getDocumentBriefs(this.destroyRef).subscribe({
-                        next: (newDocuments) => {
-                            this.documentResponse.set(newDocuments);
-                        },
-                    });
-                },
-                error: (err: HttpErrorResponse) => {
-                    if (err.status === 409) {
-                        this.nameDialogMessage.set('DUPLICATE_TITLE');
-                        console.log(err);
-                    } else {
-                        throw err;
-                    }
-                },
-            });
-    }
-
-    private briefsUpdateSubscription: Subscription | null = null;
-
-    updateDocumentBriefs() {
-        this.briefsUpdateSubscription?.unsubscribe();
-
-        this.briefsUpdateSubscription = this.documentApi
-            .getDocumentBriefs(this.destroyRef)
-            .subscribe({
-                next: (documentBriefs) => {
-                    this.documentResponse.set(documentBriefs);
-                },
-            });
     }
 
     constructor() {
