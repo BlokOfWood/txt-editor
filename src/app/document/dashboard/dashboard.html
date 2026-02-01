@@ -37,7 +37,7 @@
 
 <dialog #nameDialog>
     <div class="fixed inset-0 justify-items-center content-center">
-        <form class="border-accent border-4 w-fit p-8 rounded" (submit)="submitNewDocRequest()">
+        <form class="border-accent bg-bg border-4 w-fit p-8 rounded" (submit)="submitNewDocRequest()">
             <h1 class="mb-2 font-bold">Specify the name of the new document</h1>
             <message [messageKey]="nameDialogMessage()"></message>
             <input
@@ -56,7 +56,7 @@
 
 <dialog #deleteConfirmDialog>
     <div class="fixed inset-0 justify-items-center content-center">
-        <form class="border-accent border-4 w-fit p-8 rounded" (submit)="submitDeleteDocRequest()">
+        <form class="border-accent bg-bg border-4 w-fit p-8 rounded" (submit)="submitDeleteDocRequest()">
             <h1 class="mb-2 font-bold">
                 Are you sure you want to delete the following document?
             </h1>
