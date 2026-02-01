@@ -7,11 +7,13 @@ import { isLoggedOutTsGuard } from './guards/is-logged-out.ts-guard';
 import { documentsResolver } from './resolvers/documents-resolver';
 import { Editor } from './document/editor/editor';
 import { documentResolver } from './resolvers/document-resolver';
+import { TestPage } from './test-page/test-page';
 
 export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'login' },
     { path: 'login', component: Login, canActivate: [isLoggedOutTsGuard] },
     { path: 'register', component: Register, canActivate: [isLoggedOutTsGuard] },
+    { path: 'test', component: TestPage, canActivate:[isLoggedInTsGuard]},
     {
         path: 'document',
         children: [
