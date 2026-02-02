@@ -2,7 +2,6 @@ import {
     Component,
     computed,
     DestroyRef,
-    effect,
     ElementRef,
     inject,
     signal,
@@ -16,8 +15,9 @@ import { DocumentBrief, DocumentBriefsDto } from '../../../models/document.model
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MessageComponent } from '../../reusable-components/message/message';
-import { catchError, firstValueFrom, Subscription, tap } from 'rxjs';
+import { catchError, debounceTime, firstValueFrom, Subscription, tap } from 'rxjs';
 import { ArrowLeft, ArrowRight, LucideAngularModule, Trash2 } from 'lucide-angular';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-dashboard',
@@ -59,6 +59,8 @@ export class Dashboard {
     totalPageCount = computed(() =>
         Math.ceil(this.documentResponse().totalDocumentCount / Dashboard.DOCUMENTS_PER_PAGE),
     );
+
+    searchString = signal('');
 
     deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>('deleteConfirmDialog');
     toBeDeletedDocument = signal<DocumentBrief | null>(null);
@@ -167,6 +169,7 @@ export class Dashboard {
 
         this.briefsUpdateSubscription = this.documentApi
             .getDocumentBriefs(
+                this.searchString(),
                 Dashboard.DOCUMENTS_PER_PAGE * (this.currentPageNumber() - 1),
                 Dashboard.DOCUMENTS_PER_PAGE,
                 this.destroyRef,
@@ -242,5 +245,9 @@ export class Dashboard {
         this.route.data.subscribe((data) => {
             this.documentResponse.set(data['documents']);
         });
+
+        toObservable(this.searchString)
+            .pipe(debounceTime(500))
+            .subscribe(() => this.updateDocumentBriefs());
     }
 }

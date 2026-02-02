@@ -7,5 +7,5 @@ import { Dashboard } from '../document/dashboard/dashboard';
 export const documentsResolver: ResolveFn<DocumentBriefsDto> = () => {
     const documentApi = inject(DocumentApi);
 
-    return documentApi.getDocumentBriefs(0, Dashboard.DOCUMENTS_PER_PAGE, inject(DestroyRef));
+    return documentApi.getDocumentBriefs("", 0, Dashboard.DOCUMENTS_PER_PAGE, inject(DestroyRef));
 };

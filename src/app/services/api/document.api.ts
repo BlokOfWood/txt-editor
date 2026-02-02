@@ -9,8 +9,8 @@ import { Observable } from 'rxjs';
 export class DocumentApi {
     private api = inject(Api);
 
-    getDocumentBriefs(offset: number, quantity: number, destroyRef: DestroyRef): Observable<DocumentBriefsDto> {
-        return this.api.get(`document?offset=${offset}&quantity=${quantity}`, destroyRef);
+    getDocumentBriefs(searchQuery: string, offset: number, quantity: number, destroyRef: DestroyRef): Observable<DocumentBriefsDto> {
+        return this.api.get(`document?query=${searchQuery}&offset=${offset}&quantity=${quantity}`, destroyRef);
     }
 
     getDocumentById(id: string, destroyRef: DestroyRef): Observable<DocumentDto> {
