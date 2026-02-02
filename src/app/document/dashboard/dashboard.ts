@@ -250,7 +250,7 @@ export class Dashboard {
         });
 
         toObservable(this.searchString)
-            .pipe(debounceTime(500))
+            .pipe(debounceTime(300))
             .subscribe(() => this.updateDocumentBriefs());
     }
 }
