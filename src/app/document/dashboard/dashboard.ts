@@ -57,7 +57,10 @@ export class Dashboard {
 
     currentPageNumber = signal(1);
     totalPageCount = computed(() =>
-        Math.ceil(this.documentResponse().totalDocumentCount / Dashboard.DOCUMENTS_PER_PAGE),
+        Math.max(
+            Math.ceil(this.documentResponse().totalDocumentCount / Dashboard.DOCUMENTS_PER_PAGE),
+            1,
+        ),
     );
 
     searchString = signal('');
