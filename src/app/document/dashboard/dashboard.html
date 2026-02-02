@@ -38,7 +38,7 @@
         </div>
 
         <div class="mt-4 flex justify-center items-center gap-4">
-            <button class="w-fit aspect-square p-1" (click)="goToPrevPage()">
+            <button class="w-fit aspect-square p-1" [disabled]="currentPageNumber() <= 1" (click)="goToPrevPage()">
                 <i-lucide [img]="ArrowLeft" size="20" />
             </button>
             <input
@@ -51,7 +51,7 @@
             />
             <div>/</div>
             <div>{{ totalPageCount() }}</div>
-            <button (click)="goToNextPage()" class="w-fit aspect-square p-1">
+            <button (click)="goToNextPage()" [disabled]="currentPageNumber() >= totalPageCount()" class="w-fit aspect-square p-1">
                 <i-lucide [img]="ArrowRight" size="20" />
             </button>
         </div>

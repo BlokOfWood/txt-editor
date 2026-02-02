@@ -9,6 +9,7 @@
     --color-accent: #ffc388;
     --color-text: black;
     --color-danger: #fb2c36;
+    --color-disabled: #555;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,7 +43,15 @@
     }
 
     button {
-        @apply bg-primary px-4 py-2 rounded  hover:bg-accent hover:underline transition-colors duration-100 cursor-pointer;
+        @apply bg-primary px-4 py-2 rounded transition-colors duration-100 cursor-pointer;
+    }
+
+    button:hover:not(:disabled) {
+        @apply bg-accent underline;
+    }
+
+    button:disabled {
+        @apply bg-disabled cursor-default;
     }
 
     h1 {
