@@ -3,10 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { Api } from '../services/api/api';
 
 @Component({
-  selector: 'app-test-page',
-  imports: [FormsModule],
-  templateUrl: './test-page.html',
-  styleUrl: './test-page.css',
+    selector: 'app-test-page',
+    imports: [FormsModule],
+    templateUrl: './test-page.html',
+    styleUrl: './test-page.css',
 })
 export class TestPage {
     private destroyRef = inject(DestroyRef);
@@ -14,6 +14,8 @@ export class TestPage {
     mockDocQuantity = signal(1);
 
     createMockDocs() {
-        this.api.post(`document/mock?quantity=${this.mockDocQuantity()}`, {}, this.destroyRef).subscribe(() => console.log('success'));
+        this.api
+            .post(`document/mock?quantity=${this.mockDocQuantity()}`, {}, this.destroyRef)
+            .subscribe(() => console.log('success'));
     }
 }
