@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
 import { DocumentApi } from '../../services/api/document.api';
+import { Encryption } from '../../services/encryption';
 
 @Component({
     selector: 'app-editor',
@@ -15,6 +16,7 @@ export class Editor {
     // TODO: Add ability to modify title
     documentApi = inject(DocumentApi);
     route = inject(ActivatedRoute);
+    encryption = inject(Encryption);
     destroyRef = inject(DestroyRef);
 
     textEncoder = new TextEncoder();

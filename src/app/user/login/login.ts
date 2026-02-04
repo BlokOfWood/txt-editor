@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Message, MessageKey } from '../../../models/ui.model';
 import { User } from '../../services/user';
 import { MessageComponent } from "../../reusable-components/message/message";
+import { Encryption } from '../../services/encryption';
 
 @Component({
     selector: 'app-login',
@@ -19,6 +20,7 @@ export class Login {
     private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     private userService = inject(User);
+    private encryption = inject(Encryption);
 
     message = signal<MessageKey>(null);
 
@@ -30,11 +32,14 @@ export class Login {
 
         event.preventDefault();
 
-        this.userApi.login(this.loginForm().value(), this.destroyRef).pipe().subscribe({
+        const loginFormValue = this.loginForm().value()
+
+        this.userApi.login(loginFormValue, this.destroyRef).pipe().subscribe({
             next: () => {
                 this.message.set('LOGIN_SUCCESSFUL');
 
-                this.userService.login();
+                this.userService.login(this.loginModel().password);
+                this.encryption.setEncryptionKey(loginFormValue.password);
 
                 const timeoutId = setTimeout(() => {
                     this.router.navigateByUrl("/document");

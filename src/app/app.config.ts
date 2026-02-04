@@ -6,13 +6,15 @@ import {
     provideBrowserGlobalErrorListeners,
     provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { User } from './services/user';
 import { isPlatformBrowser } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
+import { Encryption } from './services/encryption';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -25,8 +27,15 @@ export const appConfig: ApplicationConfig = {
     ],
 };
 
-function appInit() {
+async function appInit() {
     if (!isPlatformBrowser(inject(PLATFORM_ID))) return Promise.resolve();
 
-    return inject(User).init();
+    const user = inject(User);
+    const encryption = inject(Encryption);
+    const router = inject(Router);
+
+    await firstValueFrom(user.init(), { defaultValue: null });
+    await encryption.loadEncryptionKey();
+
+    return;
 }
