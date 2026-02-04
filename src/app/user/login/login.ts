@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { LoginDto } from '../../../models/user.model';
-import { form, Field } from '@angular/forms/signals';
+import { form, FormField } from '@angular/forms/signals';
 import { UserApi } from '../../services/api/user.api';
 import { Router, RouterLink } from "@angular/router";
 import { HttpErrorResponse } from '@angular/common/http';
@@ -11,7 +11,7 @@ import { Encryption } from '../../services/encryption';
 
 @Component({
     selector: 'app-login',
-    imports: [Field, RouterLink, MessageComponent],
+    imports: [FormField, RouterLink, MessageComponent],
     templateUrl: './login.html',
     styleUrl: './login.css',
 })

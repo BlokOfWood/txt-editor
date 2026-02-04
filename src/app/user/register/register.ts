@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { RegisterDto } from '../../../models/user.model';
-import { form, Field } from '@angular/forms/signals';
+import { form, FormField } from '@angular/forms/signals';
 import { UserApi } from '../../services/api/user.api';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from "@angular/common";
@@ -10,7 +10,7 @@ import { MessageKey } from '../../../models/ui.model';
 
 @Component({
     selector: 'app-register',
-    imports: [Field, CommonModule, RouterLink, MessageComponent],
+    imports: [FormField, CommonModule, RouterLink, MessageComponent],
     templateUrl: './register.html',
     styleUrl: './register.css',
 })

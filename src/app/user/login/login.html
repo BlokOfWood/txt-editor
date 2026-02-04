@@ -2,11 +2,11 @@
     <message [messageKey]="message()"></message>
     <div>
         <label class="text-center block mb-2" for="username">Username</label>
-        <input [field]="loginForm.username" class="p-1" id="username" type="text" />
+        <input [formField]="loginForm.username" class="p-1" id="username" type="text" />
     </div>
     <div>
         <label class="text-center block mb-2" for="password">Password</label>
-        <input [field]="loginForm.password" class="p-1" id="password" type="password" />
+        <input [formField]="loginForm.password" class="p-1" id="password" type="password" />
     </div>
     <button>Login</button>
     <p>No account yet? Register <a routerLink="/register">here</a></p>

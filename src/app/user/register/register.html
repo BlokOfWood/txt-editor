@@ -2,15 +2,15 @@
     <message [messageKey]="message()"></message>
     <div>
         <label class="text-center block mb-2" for="username">Username</label>
-        <input [field]="registerForm.username" class="p-1" id="username" type="text" />
+        <input [formField]="registerForm.username" class="p-1" id="username" type="text" />
     </div>
     <div>
         <label class="text-center block mb-2" for="password">Password</label>
-        <input [field]="registerForm.password" class="p-1" id="password" type="password" />
+        <input [formField]="registerForm.password" class="p-1" id="password" type="password" />
     </div>
     <div>
         <label class="text-center block mb-2" for="confirmPassword">Confirm Password</label>
-        <input [field]="registerForm.confirmPassword" class="p-1" id="confirmPassword" type="password" />
+        <input [formField]="registerForm.confirmPassword" class="p-1" id="confirmPassword" type="password" />
     </div>
     <button>Register</button>
     <p>Already have an account? Login <a routerLink="/login">here</a></p>
