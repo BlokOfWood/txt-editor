@@ -23,28 +23,57 @@ export class Encryption {
 
     encryptionKey: CryptoKey | null = null;
 
-    async encryptText(plainText: string): Promise<ArrayBuffer> {
-        if (this.encryptionKey == null) {
-            this.user.logout();
-            throw 'No encryption key set!';
-        }
+    async encryptText(plainText: string): Promise<{ cipherText: ArrayBuffer; iv: Uint32Array }> {
+        try {
+            if (this.encryptionKey == null) {
+                this.user.logout();
+                throw 'No encryption key set!';
+            }
 
-        return await this.crypto.encrypt(
-            this.aesKeyAlgorithm,
-            this.encryptionKey,
-            this.textEncoder.encode(plainText),
-        );
+            let iv = new Uint32Array(3);
+            window.crypto.getRandomValues(iv);
+
+            let aesGcmParams: AesGcmParams = {
+                name: 'AES-GCM',
+                iv,
+                tagLength: 128,
+            };
+
+            let cipherText = await this.crypto.encrypt(
+                aesGcmParams,
+                this.encryptionKey,
+                this.textEncoder.encode(plainText),
+            );
+            return {
+                cipherText,
+                iv,
+            };
+        } catch (err) {
+            console.error(err);
+            throw 'Failed to encrypt text!';
+        }
     }
 
-    async decryptText(cipherTextBytes: ArrayBuffer): Promise<string> {
-        if (this.encryptionKey == null) {
-            this.user.logout();
-            throw 'No encryption key set!';
-        }
+    async decryptText(cipherTextBytes: ArrayBuffer, iv: BufferSource): Promise<string> {
+        try {
+            if (this.encryptionKey == null) {
+                this.user.logout();
+                throw 'No encryption key set!';
+            }
 
-        return this.textDecoder.decode(
-            await this.crypto.decrypt(this.aesKeyAlgorithm, this.encryptionKey, cipherTextBytes),
-        );
+            let aesGcmParams: AesGcmParams = {
+                name: 'AES-GCM',
+                iv,
+                tagLength: 128,
+            };
+
+            return this.textDecoder.decode(
+                await this.crypto.decrypt(aesGcmParams, this.encryptionKey, cipherTextBytes),
+            );
+        } catch (err) {
+            console.error(err);
+            throw 'Failed to decrypt text!';
+        }
     }
 
     async setEncryptionKey(password: string) {
