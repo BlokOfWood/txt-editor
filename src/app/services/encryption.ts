@@ -23,14 +23,14 @@ export class Encryption {
 
     encryptionKey: CryptoKey | null = null;
 
-    async encryptText(plainText: string): Promise<{ cipherText: ArrayBuffer; iv: Uint32Array }> {
+    async encryptText(plainText: string): Promise<{ cipherTextB64: string; ivB64: string }> {
         try {
             if (this.encryptionKey == null) {
                 this.user.logout();
                 throw 'No encryption key set!';
             }
 
-            let iv = new Uint32Array(3);
+            let iv = new Uint8Array(12);
             window.crypto.getRandomValues(iv);
 
             let aesGcmParams: AesGcmParams = {
@@ -44,9 +44,15 @@ export class Encryption {
                 this.encryptionKey,
                 this.textEncoder.encode(plainText),
             );
+
+            const cipherTextArray = new Uint8Array(cipherText);
+            const cipherTextB64 = btoa(String.fromCharCode(...cipherTextArray));
+
+            const ivB64 = btoa(String.fromCharCode(...iv));
+
             return {
-                cipherText,
-                iv,
+                cipherTextB64,
+                ivB64,
             };
         } catch (err) {
             console.error(err);
@@ -54,7 +60,7 @@ export class Encryption {
         }
     }
 
-    async decryptText(cipherTextBytes: ArrayBuffer, iv: BufferSource): Promise<string> {
+    async decryptText(cipherTextBytes: BufferSource, iv: BufferSource): Promise<string> {
         try {
             if (this.encryptionKey == null) {
                 this.user.logout();

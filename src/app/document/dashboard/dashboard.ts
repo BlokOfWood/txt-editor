@@ -15,9 +15,10 @@ import { DocumentBrief, DocumentBriefsDto } from '../../../models/document.model
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MessageComponent } from '../../reusable-components/message/message';
-import { catchError, debounceTime, firstValueFrom, Subscription, tap } from 'rxjs';
+import { catchError, debounceTime, firstValueFrom, Observable, Subscription, tap } from 'rxjs';
 import { ArrowLeft, ArrowRight, LucideAngularModule, Trash2 } from 'lucide-angular';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { Encryption } from '../../services/encryption';
 
 @Component({
     selector: 'app-dashboard',
@@ -34,6 +35,7 @@ export class Dashboard {
 
     private documentApi = inject(DocumentApi);
     private route = inject(ActivatedRoute);
+    private encryption = inject(Encryption);
     private destroyRef = inject(DestroyRef);
 
     readonly TrashIcon = Trash2;
@@ -146,23 +148,39 @@ export class Dashboard {
         this.nameDialog().nativeElement.close();
     }
 
-    submitNewDocRequest() {
-        this.documentApi
-            .createNewDocument({ title: this.newDocumentName() }, this.destroyRef)
-            .subscribe({
-                next: () => {
-                    this.closeNameDialog();
+    async createNewDocument(title: string, content: string): Promise<Observable<void>> {
+        const { cipherTextB64, ivB64 } = await this.encryption.encryptText(content);
+
+        return this.documentApi
+            .createNewDocument(
+                {
+                    title,
+                    content: cipherTextB64,
+                    initializationVector: ivB64,
+                },
+                this.destroyRef,
+            )
+            .pipe(
+                tap(() => {
                     this.updateDocumentBriefs();
-                },
-                error: (err: HttpErrorResponse) => {
-                    if (err.status === 409) {
-                        this.nameDialogMessage.set('DUPLICATE_TITLE');
-                        console.log(err);
-                    } else {
-                        throw err;
-                    }
-                },
-            });
+                }),
+            );
+    }
+
+    async submitNewDocRequest() {
+        (await this.createNewDocument(this.newDocumentName(), '')).subscribe({
+            next: () => {
+                this.closeNameDialog();
+            },
+            error: (err: HttpErrorResponse) => {
+                if (err.status === 409) {
+                    this.nameDialogMessage.set('DUPLICATE_TITLE');
+                    console.log(err);
+                } else {
+                    throw err;
+                }
+            },
+        });
     }
 
     private briefsUpdateSubscription: Subscription | null = null;
@@ -210,20 +228,15 @@ export class Dashboard {
             Promise.all(
                 files.map(async (file) =>
                     firstValueFrom(
-                        this.documentApi
-                            .createNewDocument(
-                                {
-                                    title: file.name.endsWith('.txt')
-                                        ? file.name.slice(0, -4)
-                                        : file.name,
-                                    content: await file.text(),
-                                },
-                                this.destroyRef,
+                        (
+                            await this.createNewDocument(
+                                file.name.endsWith('.txt') ? file.name.slice(0, -4) : file.name,
+                                await file.text(),
                             )
-                            .pipe(
-                                tap(() => addedFileCount++),
-                                catchError(() => [{}]),
-                            ),
+                        ).pipe(
+                            tap(() => addedFileCount++),
+                            catchError(() => [{}]),
+                        ),
                     ),
                 ),
             ).then(() => {
