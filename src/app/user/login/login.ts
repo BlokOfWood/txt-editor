@@ -2,12 +2,13 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { LoginDto } from '../../../models/user.model';
 import { form, FormField } from '@angular/forms/signals';
 import { UserApi } from '../../services/api/user.api';
-import { Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Message, MessageKey } from '../../../models/ui.model';
+import { MessageKey } from '../../../models/message.model';
 import { User } from '../../services/user';
-import { MessageComponent } from "../../reusable-components/message/message";
+import { MessageComponent } from '../../reusable-components/message/message';
 import { Encryption } from '../../services/encryption';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-login',
@@ -24,7 +25,7 @@ export class Login {
 
     message = signal<MessageKey>(null);
 
-    loginModel = signal<LoginDto>({ username: "", password: "" });
+    loginModel = signal<LoginDto>({ username: '', password: '' });
     loginForm = form(this.loginModel);
 
     login(event: SubmitEvent): void {
@@ -32,37 +33,51 @@ export class Login {
 
         event.preventDefault();
 
-        const loginFormValue = this.loginForm().value()
+        const loginFormValue = this.loginForm().value();
 
-        this.userApi.login(loginFormValue, this.destroyRef).pipe().subscribe({
-            next: () => {
-                this.message.set('LOGIN_SUCCESSFUL');
+        this.userApi
+            .login(loginFormValue, this.destroyRef)
+            .pipe()
+            .subscribe({
+                next: () => {
+                    this.message.set('LOGIN_SUCCESSFUL');
 
-                this.userService.login(this.loginModel().password);
-                this.encryption.setEncryptionKey(loginFormValue.password);
+                    this.userService.login();
+                    this.encryption.setEncryptionKey(loginFormValue.password);
 
-                const timeoutId = setTimeout(() => {
-                    this.router.navigateByUrl("/document");
-                }, 500);
+                    const timeoutId = setTimeout(() => {
+                        this.router.navigateByUrl('/document');
+                    }, 500);
 
-                this.destroyRef.onDestroy(() => { clearTimeout(timeoutId); });
-            },
-            error: (error: HttpErrorResponse) => {
-                switch (error.status) {
-                    case 0:
-                        this.message.set('CONNECTION_FAILED');
-                        return;
-                    case 401:
-                        this.message.set('INVALID_LOGIN');
-                        return;
-                    case 500:
-                        this.message.set('SERVER_ERROR');
-                        return;
-                    default:
-                        this.message.set('UNKNOWN_ERROR');
-                        return;
-                }
-            }
-        });
+                    this.destroyRef.onDestroy(() => {
+                        clearTimeout(timeoutId);
+                    });
+                },
+                error: (error: HttpErrorResponse) => {
+                    switch (error.status) {
+                        case 0:
+                            this.message.set('CONNECTION_FAILED');
+                            return;
+                        case 401:
+                            this.message.set('INVALID_LOGIN');
+                            return;
+                        case 500:
+                            this.message.set('SERVER_ERROR');
+                            return;
+                        default:
+                            this.message.set('UNKNOWN_ERROR');
+                            return;
+                    }
+                },
+            });
+    }
+
+    constructor() {
+        const message = this.router.currentNavigation()?.extras.state?.['message'];
+
+        if (message !== undefined)
+            this.message.set(message);
+        else
+            this.message.set(null);
     }
 }

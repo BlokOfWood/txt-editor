@@ -1,3 +1,2 @@
-<div [class.text-red-500]="message()?.type === 'error'" class="h-6 my-4">
-    {{ message()?.message }}
+<div [innerHTML]="message()?.message" [class.text-red-500]="message()?.type === 'error'" class="h-6 my-4 text-center">
 </div>

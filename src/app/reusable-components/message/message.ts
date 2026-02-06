@@ -1,5 +1,5 @@
-import { Component, computed, effect, input, InputSignal } from '@angular/core';
-import { messages } from '../../../models/ui.model';
+import { Component, computed, input } from '@angular/core';
+import { messages } from '../../../models/message.model';
 
 @Component({
     selector: 'message',

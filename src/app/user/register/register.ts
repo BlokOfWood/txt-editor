@@ -6,7 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from "@angular/common";
 import { Router, RouterLink } from "@angular/router";
 import { MessageComponent } from "../../reusable-components/message/message";
-import { MessageKey } from '../../../models/ui.model';
+import { MessageKey } from '../../../models/message.model';
 
 @Component({
     selector: 'app-register',

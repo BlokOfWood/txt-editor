@@ -6,6 +6,7 @@ import { debounceTime } from 'rxjs';
 import { DocumentApi } from '../../services/api/document.api';
 import { Encryption } from '../../services/encryption';
 import { DocumentDto } from '../../../models/document.model';
+import { User } from '../../services/user';
 
 @Component({
     selector: 'app-editor',
@@ -17,10 +18,14 @@ export class Editor {
     documentApi = inject(DocumentApi);
     route = inject(ActivatedRoute);
     encryption = inject(Encryption);
+    user = inject(User);
     destroyRef = inject(DestroyRef);
 
     textDecoder = new TextDecoder();
     textEncoder = new TextEncoder();
+
+    cipherTextBytes = new ArrayBuffer();
+    initVectorBytes = new ArrayBuffer();
 
     documentId: string = '';
     title = signal('');
@@ -34,15 +39,20 @@ export class Editor {
             this.title.set(data['document'].title);
 
             const documentDto = data['document'] as DocumentDto;
-            const cipherTextBytes = this.base64ToArrayBuffer(documentDto.content);
-            const initVectorBytes = this.base64ToArrayBuffer(documentDto.initializationVector);
+            this.cipherTextBytes = this.base64ToArrayBuffer(documentDto.content);
+            this.initVectorBytes = this.base64ToArrayBuffer(documentDto.initializationVector);
 
-            const decryptedText = await this.encryption.decryptText(
-                cipherTextBytes,
-                initVectorBytes,
-            );
+            try {
+                const decryptedText = await this.encryption.decryptText(
+                    this.cipherTextBytes,
+                    this.initVectorBytes,
+                );
+                this.content.set(decryptedText);
+            } catch (err) {
+                this.user.logout({ message: 'LOGOUT_ENCRYPTION_KEY_INVALID' });
 
-            this.content.set(decryptedText);
+                throw err;
+            }
         });
 
         toObservable(this.title)
@@ -56,6 +66,16 @@ export class Editor {
         toObservable(this.content)
             .pipe(debounceTime(500))
             .subscribe(async (newValue) => {
+                try {
+                    const _ = await this.encryption.decryptText(
+                        this.cipherTextBytes,
+                        this.initVectorBytes,
+                    );
+                } catch (err) {
+                    this.user.logout({ message: 'LOGOUT_ENCRYPTION_KEY_INVALID' });
+                    throw err;
+                }
+
                 const { cipherTextB64: cipherText, ivB64: iv } =
                     await this.encryption.encryptText(newValue);
 
@@ -65,7 +85,10 @@ export class Editor {
                         { content: cipherText, initializationVector: iv },
                         this.destroyRef,
                     )
-                    .subscribe();
+                    .subscribe(() => {
+                        this.cipherTextBytes = this.base64ToArrayBuffer(cipherText);
+                        this.initVectorBytes = this.base64ToArrayBuffer(iv);
+                    });
             });
     }
 

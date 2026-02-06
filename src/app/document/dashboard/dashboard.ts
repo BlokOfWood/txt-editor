@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { DocumentApi } from '../../services/api/document.api';
 import { FormsModule } from '@angular/forms';
-import { MessageKey } from '../../../models/ui.model';
+import { MessageKey } from '../../../models/message.model';
 import { DocumentBrief, DocumentBriefsDto } from '../../../models/document.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -129,10 +129,10 @@ export class Dashboard {
             next: () => {
                 this.updateDocumentBriefs();
                 this.closeDeleteDialog();
-                this.message.set('SUCCESSFUL_DELETE');
+                this.message.set('DELETE_SUCCESSFUL');
             },
             error: () => {
-                this.message.set('FAILED_TO_DELETE');
+                this.message.set('DELETE_FAIL');
             },
         });
     }

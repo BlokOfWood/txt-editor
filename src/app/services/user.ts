@@ -15,17 +15,17 @@ export class User {
 
     private _isLoggedIn = false;
 
-    login(password: string): void {
+    login(): void {
         this._isLoggedIn = true;
     }
 
-    logout(): void {
+    logout(params?: { [k: string]: any }): void {
         if (!this._isLoggedIn) return;
 
         this.userApi.logout(this.destroyRef).subscribe(() => {
             this._isLoggedIn = false;
             localStorage.removeItem(Encryption.LocalStorageKey);
-            this.router.navigate(['login'], { relativeTo: null });
+            this.router.navigate(['login'], { relativeTo: null, state: params });
         });
     }
 
