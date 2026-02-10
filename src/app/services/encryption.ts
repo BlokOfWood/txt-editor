@@ -9,6 +9,12 @@ export class Encryption {
 
     readonly user = inject(User);
     readonly crypto = globalThis.crypto.subtle;
+    static readonly CryptoKeyDbConfig = {
+        DATABASE_NAME: 'KeyDb',
+        OBJECT_STORE_NAME: 'KeyObjectStore',
+        VERSION: 1,
+        KEY_ID: 1,
+    };
 
     readonly textEncoder = new TextEncoder();
     readonly textDecoder = new TextDecoder();
@@ -17,7 +23,7 @@ export class Encryption {
         name: 'PBKDF2',
         hash: 'SHA-512',
         salt: this.textEncoder.encode('salt'),
-        iterations: 100,
+        iterations: 1000000,
     };
     readonly aesKeyAlgorithm: AesKeyAlgorithm = { name: 'AES-GCM', length: 256 };
 
@@ -90,42 +96,76 @@ export class Encryption {
             false,
             ['deriveKey'],
         );
-        this.encryptionKey = await this.crypto.deriveKey(
+        const key = await this.crypto.deriveKey(
             this.keyDeriveParams,
             passwordKey,
             this.aesKeyAlgorithm,
-            true,
+            false,
             ['encrypt', 'decrypt'],
         );
+        this.encryptionKey = key;
 
-        localStorage.setItem(
-            Encryption.LocalStorageKey,
-            JSON.stringify(new Uint32Array(await this.crypto.exportKey('raw', this.encryptionKey))),
-        );
+        const open = this.openDb();
+
+        open.onsuccess = function () {
+            const db = open.result;
+            const tx = db.transaction(Encryption.CryptoKeyDbConfig.OBJECT_STORE_NAME, 'readwrite');
+            const store = tx.objectStore(Encryption.CryptoKeyDbConfig.OBJECT_STORE_NAME);
+
+            store.put({ id: 1, key });
+        };
+
+        open.onerror = function (errorEvent) {
+            throw errorEvent;
+        };
     }
 
     async loadEncryptionKey() {
         try {
-            const key = localStorage.getItem(Encryption.LocalStorageKey);
+            const open = this.openDb();
 
-            if (key == null) {
-                throw 'No encryption key found!';
-            }
+            const key: CryptoKey = await new Promise((resolve, error) => {
+                open.onsuccess = () => {
+                    const db = open.result;
+                    const tx = db.transaction(
+                        Encryption.CryptoKeyDbConfig.OBJECT_STORE_NAME,
+                        'readonly',
+                    );
+                    const store = tx.objectStore(Encryption.CryptoKeyDbConfig.OBJECT_STORE_NAME);
 
-            const keyBytes: Uint32Array = new Uint32Array(Object.values(JSON.parse(key)));
+                    const keyRequest = store.get(1);
 
-            this.encryptionKey = await this.crypto.importKey(
-                'raw',
-                keyBytes as BufferSource,
-                this.aesKeyAlgorithm,
-                true,
-                ['encrypt', 'decrypt'],
-            );
+                    keyRequest.onsuccess = () => resolve(keyRequest.result?.key);
+                    keyRequest.onerror = (errorEvent) => error(errorEvent);
+                };
+                open.onerror = (errorEvent) => {
+                    error(errorEvent);
+                };
+            });
+
+            this.encryptionKey = key;
         } catch (err) {
             if (this.user.isLoggedIn) {
                 console.error(err);
                 this.user.logout();
             }
         }
+    }
+
+    openDb(): IDBOpenDBRequest {
+        const indexedDB = window.indexedDB;
+        const open = indexedDB.open(
+            Encryption.CryptoKeyDbConfig.DATABASE_NAME,
+            Encryption.CryptoKeyDbConfig.VERSION,
+        );
+
+        open.onupgradeneeded = function () {
+            const db = open.result;
+            db.createObjectStore(Encryption.CryptoKeyDbConfig.OBJECT_STORE_NAME, {
+                keyPath: 'id',
+            });
+        };
+
+        return open;
     }
 }
