@@ -15,6 +15,7 @@ import { User } from './services/user';
 import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { Encryption } from './services/encryption';
+import { Websocket } from './services/websocket';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -32,7 +33,6 @@ async function appInit() {
 
     const user = inject(User);
     const encryption = inject(Encryption);
-    const router = inject(Router);
 
     await firstValueFrom(user.init(), { defaultValue: null });
     await encryption.loadEncryptionKey();

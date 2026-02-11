@@ -3,6 +3,7 @@ import { UserApi } from './api/user.api';
 import { catchError, EMPTY, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { Encryption } from './encryption';
+import { Websocket } from './websocket';
 
 // TODO: handle expiry that happens while the user is logged in
 @Injectable({
@@ -11,12 +12,14 @@ import { Encryption } from './encryption';
 export class User {
     readonly userApi = inject(UserApi);
     readonly router = inject(Router);
+    readonly websocket = inject(Websocket);
     readonly destroyRef = inject(DestroyRef);
 
     private _isLoggedIn = false;
 
     login(): void {
         this._isLoggedIn = true;
+        this.websocket.init('ws://localhost:5129/document/ws');
     }
 
     logout(params?: { [k: string]: any }): void {
@@ -38,6 +41,7 @@ export class User {
             tap({
                 next: () => {
                     this._isLoggedIn = true;
+                    this.websocket.init('ws://localhost:5129/document/ws');
                 },
                 error: () => {
                     this._isLoggedIn = false;
