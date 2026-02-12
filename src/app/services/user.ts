@@ -4,6 +4,7 @@ import { catchError, EMPTY, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { Encryption } from './encryption';
 import { Websocket } from './websocket';
+import { HttpErrorResponse } from '@angular/common/http';
 
 // TODO: handle expiry that happens while the user is logged in
 @Injectable({
@@ -43,9 +44,13 @@ export class User {
                     this._isLoggedIn = true;
                     this.websocket.init('ws://localhost:5129/document/ws');
                 },
-                error: () => {
+                error: (errorResponse: HttpErrorResponse) => {
                     this._isLoggedIn = false;
-                    localStorage.removeItem(Encryption.LocalStorageKey);
+                    if (errorResponse.status === 401) {
+                        localStorage.removeItem(Encryption.LocalStorageKey);
+                    } else {
+                        throw 'Cannot connect to server!';
+                    }
                 },
             }),
             catchError((err) => EMPTY),
