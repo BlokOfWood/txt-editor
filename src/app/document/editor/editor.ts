@@ -27,10 +27,12 @@ export class Editor {
     cipherTextBytes = new ArrayBuffer();
     initVectorBytes = new ArrayBuffer();
 
-    documentId: string = '';
+    documentId = '';
     title = signal('');
     content = signal('');
-    contentAsB64 = computed(() => (this.textEncoder.encode(this.content()) as any).toBase64());
+    // @ts-expect-error toBase64() exists on Uint8Array types, but that seems to be unknown by ts-server.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/toBase64
+    contentAsB64 = computed(() => this.textEncoder.encode(this.content()).toBase64());
 
     constructor() {
         this.route.params.subscribe((params) => (this.documentId = params['id']));
@@ -67,7 +69,7 @@ export class Editor {
             .pipe(debounceTime(500))
             .subscribe(async (newValue) => {
                 try {
-                    const _ = await this.encryption.decryptText(
+                    await this.encryption.decryptText(
                         this.cipherTextBytes,
                         this.initVectorBytes,
                     );

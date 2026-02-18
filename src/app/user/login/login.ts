@@ -2,13 +2,12 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { LoginDto } from '../../../models/user.model';
 import { form, FormField } from '@angular/forms/signals';
 import { UserApi } from '../../services/api/user.api';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MessageKey } from '../../../models/message.model';
 import { User } from '../../services/user';
 import { MessageComponent } from '../../reusable-components/message/message';
 import { Encryption } from '../../services/encryption';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-login',

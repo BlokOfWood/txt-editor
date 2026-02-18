@@ -1,6 +1,6 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { Api } from './api';
-import { CreateDocumentDto, DocumentBrief, DocumentBriefsDto, DocumentDto, ModifyDocumentDto } from '../../../models/document.model';
+import { CreateDocumentDto, DocumentBriefsDto, DocumentDto, ModifyDocumentDto } from '../../../models/document.model';
 import { Observable } from 'rxjs';
 
 @Injectable({

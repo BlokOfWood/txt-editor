@@ -6,7 +6,7 @@ import {
     provideBrowserGlobalErrorListeners,
     provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
@@ -15,7 +15,6 @@ import { User } from './services/user';
 import { isPlatformBrowser } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { Encryption } from './services/encryption';
-import { Websocket } from './services/websocket';
 
 export const appConfig: ApplicationConfig = {
     providers: [

@@ -5,7 +5,7 @@
             Tip: If you drag a text file over the document list, it will be imported.
         </div>
 
-        <message [messageKey]="message()"></message>
+        <app-message [messageKey]="message()"></app-message>
 
         <div class="my-2">
             <input type="text" [(ngModel)]="searchString">
@@ -65,7 +65,7 @@
             (submit)="submitNewDocRequest()"
         >
             <h1 class="mb-2 font-bold">Specify the name of the new document</h1>
-            <message [messageKey]="nameDialogMessage()"></message>
+            <app-message [messageKey]="nameDialogMessage()"></app-message>
             <input
                 name="newDocumentName"
                 [(ngModel)]="newDocumentName"

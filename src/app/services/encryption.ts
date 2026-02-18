@@ -36,16 +36,16 @@ export class Encryption {
                 throw 'No encryption key set!';
             }
 
-            let iv = new Uint8Array(12);
+            const iv = new Uint8Array(12);
             window.crypto.getRandomValues(iv);
 
-            let aesGcmParams: AesGcmParams = {
+            const aesGcmParams: AesGcmParams = {
                 name: 'AES-GCM',
                 iv,
                 tagLength: 128,
             };
 
-            let cipherText = await this.crypto.encrypt(
+            const cipherText = await this.crypto.encrypt(
                 aesGcmParams,
                 this.encryptionKey,
                 this.textEncoder.encode(plainText),
@@ -73,7 +73,7 @@ export class Encryption {
                 throw 'No encryption key set!';
             }
 
-            let aesGcmParams: AesGcmParams = {
+            const aesGcmParams: AesGcmParams = {
                 name: 'AES-GCM',
                 iv,
                 tagLength: 128,

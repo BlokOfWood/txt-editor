@@ -23,7 +23,7 @@ export class User {
         this.websocket.init('ws://localhost:5129/document/ws');
     }
 
-    logout(params?: { [k: string]: any }): void {
+    logout(params?: Record<string, unknown>): void {
         if (!this._isLoggedIn) return;
 
         this.userApi.logout(this.destroyRef).subscribe(() => {
@@ -53,7 +53,7 @@ export class User {
                     }
                 },
             }),
-            catchError((err) => EMPTY),
+            catchError(() => EMPTY),
         );
     }
 }

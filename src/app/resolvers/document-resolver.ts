@@ -3,7 +3,7 @@ import { DocumentApi } from '../services/api/document.api';
 import { DestroyRef, inject } from '@angular/core';
 import { DocumentDto } from '../../models/document.model';
 
-export const documentResolver: ResolveFn<DocumentDto> = (route, state) => {
+export const documentResolver: ResolveFn<DocumentDto> = (route) => {
     const documentApi = inject(DocumentApi);
 
     const documentId = route.paramMap.get('id');

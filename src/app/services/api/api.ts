@@ -18,7 +18,7 @@ export class Api {
         return this.http.get<T>(this.constructUrl(endpoint), { ...options, withCredentials: true }).pipe(takeUntilDestroyed(destroyRef));
     }
 
-    post<T>(endpoint: string, body: any, destroyRef: DestroyRef, options?: Parameters<typeof this.http.post>[2]): Observable<T> {
+    post<T>(endpoint: string, body: unknown, destroyRef: DestroyRef, options?: Parameters<typeof this.http.post>[2]): Observable<T> {
         return this.http.post<T>(this.constructUrl(endpoint), body, { ...options, withCredentials: true }).pipe(takeUntilDestroyed(destroyRef));
     }
 
